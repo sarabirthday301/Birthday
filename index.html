@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Happy Birthday! 🎂✨ Today Is My Birthday!</title>
+  
+  <!-- Social Share / Open Graph Meta Tags (Looks amazing when shared on WhatsApp, Discord, iMessage) -->
+  <meta property="og:title" content="Happy Birthday! 🎂 Wishing You The Best Day Ever!">
+  <meta property="og:description" content="A special birthday surprise website! Leave a birthday wish, blow out candles, and celebrate together.">
+  <meta property="og:type" content="website">
+  
+  <!-- Google Fonts: Modern sans + handwriting font for sticky notes & letter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Outfit:wght@400;500;600;700;800&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Canvas Confetti Library via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase Compat SDKs (For Real-time Wish Sync on GitHub Pages) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- Ambient Animated Glow Orbs -->
+  <div class="bg-ambient-orb orb-1"></div>
+  <div class="bg-ambient-orb orb-2"></div>
+  <div class="bg-ambient-orb orb-3"></div>
+
+  <!-- ==========================================================================
+       SCENE 1: SURPRISE BIRTHDAY WISH & UNBOXING ENTRANCE
+       ========================================================================== -->
+  <div id="surprise-curtain" class="surprise-curtain">
+    <div class="gift-sparkle-halo"></div>
+
+    <!-- Admin Panel Option (First Page Only) -->
+    <div class="curtain-top-admin">
+      <button type="button" onclick="openAdminPanel()" class="btn-curtain-admin" title="Open Admin Panel">
+        <span>👑</span>
+        <span>Admin Panel</span>
+      </button>
+    </div>
+
+    <!-- Floating Festive Background Decorations -->
+    <div class="curtain-decor d1">🎈</div>
+    <div class="curtain-decor d2">✨</div>
+    <div class="curtain-decor d3">🎉</div>
+    <div class="curtain-decor d4">🎂</div>
+    <div class="curtain-decor d5">💖</div>
+    <div class="curtain-decor d6">🥳</div>
+
+    <!-- Centered Glass Card -->
+    <div class="curtain-card">
+      <!-- Glowing Pill Badge -->
+      <div class="curtain-pill-badge">
+        <span>✨</span>
+        <span>🎉 TODAY IS MY BIRTHDAY! 🎂</span>
+        <span>✨</span>
+      </div>
+
+      <!-- Grand Main Title -->
+      <h1 class="curtain-main-title">
+        Today Is My Birthday! 🎂✨
+      </h1>
+
+      <!-- High-Energy Subtitle -->
+      <div class="curtain-subtitle-highlight">
+        <span>🥳</span>
+        <span>Celebrate With Me & Wish Me!</span>
+        <span>🥳</span>
+      </div>
+
+      <!-- Welcoming Description -->
+      <p class="curtain-desc">
+        I'm celebrating another year around the sun and I'm so excited you're here! Tap the surprise gift box to enter my party and send me your heartfelt wishes! 💖
+      </p>
+
+      <!-- 3D Gift Box with Gift Tag -->
+      <div id="gift-box-trigger" class="gift-box-container" title="Click to enter my birthday party & wish me!">
+        <div class="curtain-gift-tag">Wish Me! 💌</div>
+        <div class="gift-box">
+          <div class="gift-box-lid">
+            <div class="gift-box-bow"></div>
+            <div class="gift-box-ribbon-v"></div>
+          </div>
+          <div class="gift-box-base">
+            <div class="gift-box-ribbon-base-v"></div>
+            <div class="gift-box-ribbon-base-h"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="curtain-actions-row">
+        <button class="btn-curtain-open" onclick="document.getElementById('gift-box-trigger').click()">
+          <span>Enter Party & Wish Me</span>
+          <span>🎁</span>
+        </button>
+        <button type="button" class="btn-curtain-wish-direct" onclick="unboxAndWish()">
+          <span>✍️ Drop a Wish Now</span>
+          <span>💌</span>
+        </button>
+      </div>
+
+      <!-- Sound Hint -->
+      <div class="curtain-sound-hint">
+        <span>🔊</span>
+        <span>Turn sound ON for celebration music & effects!</span>
+      </div>
+
+      <!-- Admin Panel Shortcut on Card (First Page Only) -->
+      <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px dashed rgba(225, 29, 72, 0.2); display: flex; justify-content: center;">
+        <button type="button" onclick="openAdminPanel()" class="btn-curtain-admin-link" title="Open Admin Panel">
+          <span>👑 Admin Panel</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       NAVIGATION BAR
+       ========================================================================== -->
+  <header class="nav-header">
+    <div class="nav-container">
+      <a href="#hero" class="logo-badge">
+        <span>🎂</span>
+        <span id="nav-friend-name">My Birthday Party! 🎂</span>
+      </a>
+
+      <div class="nav-controls">
+        <!-- Background Music Play/Pause Toggle -->
+        <button id="music-toggle-btn" class="btn-icon" title="Toggle Birthday Music" aria-label="Toggle Music">
+          <span>🎵</span>
+          <div class="music-playing-indicator">
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+          </div>
+        </button>
+
+        <!-- Admin Panel Access (2nd Page) -->
+        <button type="button" id="nav-admin-btn" onclick="openAdminPanel()" class="btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.825rem; border-radius: 50px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;" title="Admin Panel (Passkey Required)">
+          <span>👑</span>
+          <span>Admin</span>
+        </button>
+
+        <!-- Jump to Wish Wall & Open Composer Modal -->
+        <button type="button" id="nav-wish-btn" onclick="openWishModal()" class="btn-primary" style="padding: 0.55rem 1.15rem; font-size: 0.875rem; cursor: pointer;">
+          <span>💌 Wish Me</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Optional Custom MP3 Audio Tag (Uncomment and add path if you want a custom MP3) -->
+  <!-- <audio id="custom-bg-music" loop src="assets/audio/birthday-song.mp3"></audio> -->
+
+  <!-- Toast Notification for Balloon Pop -->
+  <div id="balloon-compliment-popup" style="
+    position: fixed;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #111827;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  "></div>
+  <style>
+    #balloon-compliment-popup.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+
+  <!-- ==========================================================================
+       MAIN CONTENT
+       ========================================================================== -->
+  <main>
+    <!-- HERO SECTION -->
+    <section id="hero" class="hero-section">
+      <div class="hero-pill">
+        <span>🎈</span>
+        <span>Today Is My Birthday!</span>
+        <span>🎈</span>
+      </div>
+
+      <h1 class="hero-title">Today Is My Birthday! 🎂🎉</h1>
+
+      <p class="hero-subtitle">
+        I'm celebrating another year of life, laughter, and blessings! Thank you for stopping by to celebrate with me. Pop some balloons, blow out the candles with me, and drop me a private wish below!
+      </p>
+
+      <!-- Interactive Balloon Cluster -->
+      <div class="balloon-cluster" title="Tap any balloon to pop it!">
+        <div class="balloon" style="background: #ff4b72;"></div>
+        <div class="balloon" style="background: #8b5cf6;"></div>
+        <div class="balloon" style="background: #f59e0b;"></div>
+        <div class="balloon" style="background: #10b981;"></div>
+        <div class="balloon" style="background: #06b6d4;"></div>
+      </div>
+      <p style="font-size: 0.85rem; color: #9ca3af; margin-top: -0.5rem;">💡 Tip: Tap the balloons above to pop them!</p>
+    </section>
+
+    <!-- ========================================================================
+         SCENE 2: INTERACTIVE 3D CAKE & BLOW CANDLES
+         ======================================================================== -->
+    <section class="cake-section">
+      <span class="section-tag">Celebrate With Me</span>
+      <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-top: 0.5rem; color: #111827;">
+        Blow Out The Candles With Me! 🕯️
+      </h2>
+      <p id="cake-status-text" class="cake-instructions">
+        Make a wish with me! Tap the candles or click the button below to blow them out together!
+      </p>
+
+      <!-- The 3D Layered Cake -->
+      <div class="cake-container">
+        <!-- Candles -->
+        <div id="candles-row" class="candles-row" title="Click to blow out!">
+          <div class="candle">
+            <div class="candle-wick"></div>
+            <div class="candle-flame"></div>
+            <div class="smoke-puff"></div>
+          </div>
+          <div class="candle">
+            <div class="candle-wick"></div>
+            <div class="candle-flame"></div>
+            <div class="smoke-puff"></div>
+          </div>
+          <div class="candle">
+            <div class="candle-wick"></div>
+            <div class="candle-flame"></div>
+            <div class="smoke-puff"></div>
+          </div>
+        </div>
+
+        <!-- Cake Top Tier -->
+        <div class="cake-layer cake-top">
+          <div class="cherries">
+            <div class="cherry"></div>
+            <div class="cherry"></div>
+            <div class="cherry"></div>
+          </div>
+        </div>
+
+        <!-- Cake Middle Tier -->
+        <div class="cake-layer cake-middle"></div>
+
+        <!-- Cake Bottom Tier -->
+        <div class="cake-layer cake-bottom"></div>
+
+        <!-- Cake Base Plate -->
+        <div class="cake-plate"></div>
+      </div>
+
+      <div class="cake-btn-row">
+        <button id="blow-candles-btn" class="btn-primary">
+          <span>💨 Blow Out Candles</span>
+        </button>
+        <button id="relight-candles-btn" class="btn-secondary" style="display: none;">
+          <span>🔥 Relight Candles</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         SCENE 3: PRIVATE BIRTHDAY WISH BOX (WISHES ONLY SHOW IN ADMIN PANEL)
+         ======================================================================== -->
+    <section id="wishes" class="private-wish-card">
+      <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">📬</div>
+      <span class="section-tag">Private Wish Box</span>
+      <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin: 0.5rem 0; color: #111827;">
+        Wish Me a Happy Birthday! 💌
+      </h2>
+      <p style="font-size: 1.05rem; color: #64748b; max-width: 520px; margin: 0 auto 2rem; line-height: 1.6;">
+        Leave me your personal birthday message, prayer, or special memory! Your message will be sent <strong>privately</strong> straight to my Admin Wish Box so only I can read it!
+      </p>
+
+      <button id="open-wish-modal-btn" type="button" onclick="openWishModal()" class="btn-primary" style="padding: 0.95rem 2.25rem; font-size: 1.05rem; cursor: pointer;">
+        <span>✍️ Wish Me Something Special</span>
+        <span>✨</span>
+      </button>
+
+      <div style="margin-top: 1.75rem; font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span>🔒</span>
+        <span>Messages are delivered privately to my personal Admin Panel</span>
+        <button type="button" onclick="openAdminPanel()" style="background: none; border: none; color: #ff4b72; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">(Admin Login 👑)</button>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         SCENE 4: HEARTFELT PERSONAL LETTER
+         ======================================================================== -->
+    <section class="letter-section">
+      <div class="letter-paper">
+        <h3 class="letter-heading">To Everyone Celebrating With Me, 💖</h3>
+        <p class="letter-body">
+          Thank you so much for stopping by today!
+          <br><br>
+          Every year is shaped by the wonderful people in it — the laughs we share, the moments we support each other, and all the memories along the way. I'm truly grateful to have you celebrating this milestone with me.
+          <br><br>
+          Don't forget to drop me a wish above! Here's to more joy, health, big wins, and great adventures ahead!
+        </p>
+        <div class="letter-signature">
+          With love & gratitude,<br>
+          The Birthday Celebrant ✨🎂
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       MODAL: WRITE A BIRTHDAY WISH
+       ========================================================================== -->
+  <div id="wish-modal" class="modal-overlay">
+    <div class="modal-card">
+      <button id="close-wish-modal-btn" type="button" onclick="closeWishModal()" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      
+      <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 0.25rem; color: #111827;">
+        Wish Me a Happy Birthday! 💌
+      </h3>
+      <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 1.5rem;">
+        Your message is delivered privately directly to my personal Admin Wish Box!
+      </p>
+
+      <form id="wish-form">
+        <!-- Visitor Name -->
+        <div class="form-group">
+          <label class="form-label" for="wish-name-input">Your Name or Nickname *</label>
+          <input type="text" id="wish-name-input" class="form-input" placeholder="e.g. Alex, Sarah, or Mystery Friend" required maxlength="40">
+        </div>
+
+        <!-- Tag / Relationship & Avatar -->
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label" for="wish-tag-select">Relationship</label>
+            <select id="wish-tag-select" class="form-select">
+              <option value="Friend">👯 Close Friend</option>
+              <option value="Squad">⚡ Squad</option>
+              <option value="Family">🏡 Family</option>
+              <option value="College Buddy">🎓 Classmate / Buddy</option>
+              <option value="Secret Admirer">🤫 Secret Admirer</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="wish-avatar-select">Sticker Icon</label>
+            <select id="wish-avatar-select" class="form-select">
+              <option value="🎉">🎉 Party Horn</option>
+              <option value="🎂">🎂 Cake</option>
+              <option value="💖">💖 Heart</option>
+              <option value="👑">👑 Crown</option>
+              <option value="🍕">🍕 Pizza</option>
+              <option value="🚀">🚀 Rocket</option>
+              <option value="✨">✨ Sparkles</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sticky Note Paper Color Picker -->
+        <div class="form-group">
+          <label class="form-label">Note Color Style</label>
+          <div class="color-picker-row">
+            <div class="color-option selected" data-color="yellow" style="background: #fef08a;" title="Lemon Yellow"></div>
+            <div class="color-option" data-color="pink" style="background: #fbcfe8;" title="Bubblegum Pink"></div>
+            <div class="color-option" data-color="blue" style="background: #bae6fd;" title="Sky Blue"></div>
+            <div class="color-option" data-color="mint" style="background: #a7f3d0;" title="Fresh Mint"></div>
+            <div class="color-option" data-color="lavender" style="background: #ddd6fe;" title="Soft Lavender"></div>
+          </div>
+        </div>
+
+        <!-- Message Body -->
+        <div class="form-group">
+          <label class="form-label" for="wish-message-input">Your Birthday Message *</label>
+          <textarea id="wish-message-input" class="form-textarea" placeholder="Write your heartfelt wish, inside joke, or blessing here..." required maxlength="300"></textarea>
+          
+          <!-- Quick Emoji Toolbar -->
+          <div class="emoji-bar">
+            <button type="button" class="emoji-btn">🎂</button>
+            <button type="button" class="emoji-btn">🎉</button>
+            <button type="button" class="emoji-btn">🥳</button>
+            <button type="button" class="emoji-btn">💖</button>
+            <button type="button" class="emoji-btn">✨</button>
+            <button type="button" class="emoji-btn">🥂</button>
+            <button type="button" class="emoji-btn">🌟</button>
+            <button type="button" class="emoji-btn">🎈</button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem;">
+          <span>Send Private Wish 💌</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: ADMIN PASSKEY VERIFICATION
+       ========================================================================== -->
+  <div id="admin-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 420px; text-align: center;">
+      <button type="button" onclick="closeAdminModal()" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      
+      <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">👑</div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.45rem; color: #111827; margin-bottom: 0.35rem;">
+        Admin Panel Access
+      </h3>
+      <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 1.5rem;">
+        Enter your secret passkey to open your private Birthday Wishes Dashboard in a new tab.
+      </p>
+
+      <form id="admin-login-form">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label" for="admin-pin-input">Secret Passkey</label>
+          <input type="password" id="admin-pin-input" class="form-input" placeholder="Enter passkey" required style="text-align: center; font-size: 1.15rem; letter-spacing: 2px;">
+          <p id="admin-error-msg" style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem; display: none;">Incorrect passkey! Please try again.</p>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem; font-size: 1rem; padding: 0.85rem;">
+          <span>Open Wishes Dashboard 🚀</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: IN-PAGE ADMIN DASHBOARD (SEE WHO WISHED & MODERATE)
+       ========================================================================== -->
+  <div id="admin-dashboard-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 820px; width: 95%; max-height: 88vh; display: flex; flex-direction: column; padding: 2rem;">
+      <!-- Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <span style="font-size: 2rem;">👑</span>
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.35rem; color: #0f172a; margin: 0;">
+              Admin Wishes Panel
+            </h3>
+            <span style="font-size: 0.8rem; color: #64748b;">Private view: All real sender names & messages</span>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminPanel()" class="modal-close-btn" style="position: static;" aria-label="Close Admin Panel">&times;</button>
+      </div>
+
+      <!-- Stats Bar -->
+      <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 1.25rem; flex: 1; min-width: 120px;">
+          <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">TOTAL WISHES</div>
+          <div id="inpage-admin-count" style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">0</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 1.25rem; flex: 1; min-width: 120px;">
+          <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">TOTAL LIKES</div>
+          <div id="inpage-admin-likes" style="font-size: 1.5rem; font-weight: 800; color: #e11d48;">0</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button type="button" onclick="exportAdminWishes()" class="btn-secondary" style="padding: 0.65rem 1rem; font-size: 0.85rem;">
+            <span>📥 Export Text</span>
+          </button>
+          <button type="button" onclick="lockAdminSession()" class="btn-secondary" style="padding: 0.65rem 1rem; font-size: 0.85rem; color: #dc2626;">
+            <span>🔒 Lock</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Wishes List Container -->
+      <div id="inpage-admin-wishes-list" style="overflow-y: auto; flex: 1; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.5rem; background: #fafafa;">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <!-- Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

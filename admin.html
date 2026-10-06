@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin Panel - Birthday Wishes Dashboard 👑</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Firebase Compat SDKs for Real-time sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body {
+      background: #f8fafc;
+      color: #1e293b;
+      font-family: var(--font-body);
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Top Dashboard Bar */
+    .admin-nav {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .admin-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .dashboard-container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.25rem 4rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-val {
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: var(--font-heading);
+      color: #0f172a;
+    }
+
+    /* Controls Bar */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.25rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.925rem;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      opacity: 0.6;
+    }
+
+    /* Wish Feed Items */
+    .wishes-table-wrapper {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .wish-row {
+      display: grid;
+      grid-template-columns: 200px 1fr 140px;
+      gap: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      align-items: center;
+      transition: background 0.15s ease;
+    }
+
+    .wish-row:last-child {
+      border-bottom: none;
+    }
+
+    .wish-row:hover {
+      background: #f8fafc;
+    }
+
+    .wish-sender-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .wish-sender-avatar {
+      font-size: 1.5rem;
+      background: #f1f5f9;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wish-sender-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #0f172a;
+    }
+
+    .wish-sender-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #e2e8f0;
+      color: #475569;
+      padding: 0.15rem 0.5rem;
+      border-radius: 50px;
+      display: inline-block;
+      margin-top: 0.2rem;
+    }
+
+    .wish-message-body {
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: #334155;
+      word-break: break-word;
+    }
+
+    .wish-time {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 0.35rem;
+    }
+
+    .wish-row-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.65rem;
+    }
+
+    .delete-btn-admin {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s ease;
+    }
+
+    .delete-btn-admin:hover {
+      background: #fca5a5;
+      color: #991b1b;
+    }
+
+    /* Auth Overlay */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0f172a;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .auth-card {
+      background: white;
+      border-radius: 20px;
+      max-width: 400px;
+      width: 100%;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+    }
+
+    @media (max-width: 768px) {
+      .admin-nav {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+      }
+      .admin-logo {
+        justify-content: center;
+        font-size: 1.15rem;
+      }
+      .admin-nav-actions {
+        justify-content: center;
+        width: 100%;
+        gap: 0.5rem;
+      }
+      .dashboard-container {
+        padding: 0 0.85rem 3.5rem;
+        margin: 1.25rem auto;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .stat-card {
+        padding: 0.95rem 1rem;
+        border-radius: 14px;
+      }
+      .stat-label {
+        font-size: 0.75rem;
+      }
+      .stat-val {
+        font-size: 1.5rem;
+      }
+      .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 0.85rem;
+      }
+      .table-controls > div {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+      }
+      .search-box {
+        min-width: 100%;
+      }
+      .wish-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 1.15rem 1rem;
+      }
+      .wish-row-actions {
+        justify-content: space-between;
+        width: 100%;
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 0.65rem;
+      }
+      .auth-card {
+        padding: 2rem 1.25rem;
+        border-radius: 18px;
+        margin: 0 0.5rem;
+      }
+      .search-input,
+      #admin-filter-tag {
+        font-size: 16px; /* Prevents iOS auto-zoom */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .admin-nav-actions {
+        flex-wrap: wrap;
+      }
+      .admin-nav-actions a,
+      .admin-nav-actions button {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       ADMIN AUTHENTICATION LOCK SCREEN
+       ========================================================================== -->
+  <div id="auth-lock-screen" class="auth-overlay">
+    <div class="auth-card">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">👑</div>
+      <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #0f172a; margin-bottom: 0.5rem;">
+        Admin Portal
+      </h2>
+      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.75rem;">
+        Enter your admin passkey to view and manage all birthday wishes.
+      </p>
+
+      <form id="auth-form">
+        <div style="margin-bottom: 1.25rem;">
+          <input type="password" id="auth-pin" placeholder="Enter passkey" required autofocus style="
+            width: 100%;
+            padding: 0.85rem 1rem;
+            text-align: center;
+            font-size: 1.25rem;
+            letter-spacing: 3px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            box-sizing: border-box;
+          ">
+          <p id="auth-err" style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem; display: none;">
+            Incorrect passkey! Please try again.
+          </p>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.85rem;">
+          <span>Unlock Dashboard 🔓</span>
+        </button>
+
+        <p style="margin-top: 1.5rem; font-size: 0.85rem;">
+          <a href="index.html" style="color: #64748b; text-decoration: none;">&larr; Back to Birthday Website</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       ADMIN DASHBOARD CONTENT
+       ========================================================================== -->
+  <header class="admin-nav">
+    <div class="admin-logo">
+      <span>👑</span>
+      <span>Birthday Wishes For Me</span>
+    </div>
+
+    <div class="admin-nav-actions">
+      <a href="index.html" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 50px; text-decoration: none;">
+        <span>🎉 View Website</span>
+      </a>
+
+      <button type="button" onclick="lockAdmin()" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 50px; cursor: pointer;">
+        <span>🔒 Lock Panel</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <!-- Header Title -->
+    <div style="margin-bottom: 2rem;">
+      <h1 style="font-family: var(--font-heading); font-size: 2rem; color: #0f172a; margin-bottom: 0.35rem;">
+        Wishes Sent To Me! 💌🎂
+      </h1>
+      <p style="color: #64748b; font-size: 1rem;">
+        Here are all the private messages, prayers, compliments, and heartfelt wishes sent directly to you by your friends and family.
+      </p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Wishes</div>
+        <div id="stat-total" class="stat-val">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Heart Likes</div>
+        <div id="stat-likes" class="stat-val" style="color: #e11d48;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Most Active Tag</div>
+        <div id="stat-tag" class="stat-val" style="font-size: 1.4rem; color: #8b5cf6;">—</div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="table-controls">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="admin-search" class="search-input" placeholder="Search by friend name or message...">
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <select id="admin-filter-tag" style="padding: 0.65rem 1rem; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 0.9rem;">
+          <option value="all">All Categories</option>
+          <option value="Friend">Friends</option>
+          <option value="Squad">Squad</option>
+          <option value="Family">Family</option>
+          <option value="College Buddy">Classmates</option>
+          <option value="Secret Admirer">Secret Admirer</option>
+        </select>
+
+        <button type="button" onclick="exportWishes()" class="btn-secondary" style="padding: 0.65rem 1rem; border-radius: 10px; font-size: 0.875rem;">
+          <span>📥 Export Text</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Wishes List -->
+    <div class="wishes-table-wrapper">
+      <div id="wishes-admin-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Core Data Scripts -->
+  <script src="js/firebase-config.js"></script>
+
+  <script>
+    const ADMIN_PASSKEY = "sara123"; // Admin passkey
+
+    // Check if session is already authorized
+    function checkAuth() {
+      let isAuth = false;
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("auth") === ADMIN_PASSKEY) {
+          isAuth = true;
+          if (typeof SafeStore !== "undefined") {
+            SafeStore.set("admin_authenticated", "true");
+            SafeStore.setSession("admin_authenticated", "true");
+            SafeStore.setSession("is_admin_mode", "true");
+          }
+          try {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } catch (e) {}
+        } else {
+          isAuth = (typeof SafeStore !== "undefined" && (SafeStore.getSession("admin_authenticated") === "true" || SafeStore.get("admin_authenticated") === "true")) 
+            || (sessionStorage.getItem("admin_authenticated") === "true")
+            || (localStorage.getItem("admin_authenticated") === "true");
+        }
+      } catch (e) {}
+
+      const lockScreen = document.getElementById("auth-lock-screen");
+      if (isAuth) {
+        if (lockScreen) lockScreen.style.display = "none";
+        loadDashboard();
+      } else {
+        if (lockScreen) lockScreen.style.display = "flex";
+      }
+    }
+
+    // Login Form Handler
+    document.getElementById("auth-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const pin = document.getElementById("auth-pin").value.trim();
+      const err = document.getElementById("auth-err");
+
+      if (pin === ADMIN_PASSKEY) {
+        try {
+          if (typeof SafeStore !== "undefined") {
+            SafeStore.set("admin_authenticated", "true");
+            SafeStore.setSession("admin_authenticated", "true");
+            SafeStore.setSession("is_admin_mode", "true");
+          } else {
+            sessionStorage.setItem("admin_authenticated", "true");
+            localStorage.setItem("admin_authenticated", "true");
+          }
+        } catch (e) {}
+
+        const lockScreen = document.getElementById("auth-lock-screen");
+        if (lockScreen) lockScreen.style.display = "none";
+        loadDashboard();
+      } else {
+        if (err) err.style.display = "block";
+      }
+    });
+
+    // Lock out
+    function lockAdmin() {
+      try {
+        if (typeof SafeStore !== "undefined") {
+          SafeStore.set("admin_authenticated", "false");
+          SafeStore.setSession("admin_authenticated", "false");
+          SafeStore.setSession("is_admin_mode", "false");
+        }
+        sessionStorage.removeItem("admin_authenticated");
+        sessionStorage.removeItem("is_admin_mode");
+        localStorage.removeItem("admin_authenticated");
+      } catch (e) {}
+      location.reload();
+    }
+
+    // Main Dashboard Loader
+    function loadDashboard() {
+      if (!window.wishStore) {
+        setTimeout(loadDashboard, 100);
+        return;
+      }
+
+      window.wishStore.subscribe((wishes) => {
+        renderAdminWishes(wishes);
+        updateStats(wishes);
+      });
+
+      // Search & Filter listeners
+      document.getElementById("admin-search").addEventListener("input", () => {
+        renderAdminWishes(window.wishStore.wishes);
+      });
+
+      document.getElementById("admin-filter-tag").addEventListener("change", () => {
+        renderAdminWishes(window.wishStore.wishes);
+      });
+    }
+
+    // Render List
+    function renderAdminWishes(wishes) {
+      const container = document.getElementById("wishes-admin-list");
+      const search = document.getElementById("admin-search").value.toLowerCase();
+      const filter = document.getElementById("admin-filter-tag").value;
+
+      const filtered = (wishes || []).filter((w) => {
+        const matchesSearch = (w.name || "").toLowerCase().includes(search) || (w.text || "").toLowerCase().includes(search);
+        const matchesFilter = filter === "all" || (w.tag || "").toLowerCase().includes(filter.toLowerCase());
+        return matchesSearch && matchesFilter;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 4rem 1.5rem; color: #64748b;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📭</div>
+            <h3 style="font-size: 1.25rem; color: #0f172a; margin-bottom: 0.25rem;">No wishes found</h3>
+            <p style="font-size: 0.95rem;">No messages match your search or filter.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map((wish) => `
+        <div class="wish-row" id="row-${wish.id}">
+          <!-- Sender Column -->
+          <div class="wish-sender-info">
+            <div class="wish-sender-avatar">${escapeHtml(wish.avatar || "🎂")}</div>
+            <div>
+              <div class="wish-sender-name">${escapeHtml(wish.name || "Anonymous Friend")}</div>
+              <span class="wish-sender-tag">${escapeHtml(wish.tag || "Friend")}</span>
+            </div>
+          </div>
+
+          <!-- Message Column -->
+          <div>
+            <div class="wish-message-body">"${escapeHtml(wish.text || "")}"</div>
+            <div class="wish-time">🕒 Sent: ${formatDateFull(wish.createdAt)}</div>
+          </div>
+
+          <!-- Actions Column -->
+          <div class="wish-row-actions">
+            <span style="font-size: 0.85rem; font-weight: 700; color: #e11d48; margin-right: 0.5rem;">
+              ❤️ ${wish.likes || 0}
+            </span>
+            <button type="button" class="delete-btn-admin" onclick="deleteFromAdmin('${wish.id}')">
+              <span>🗑️</span>
+              <span>Delete</span>
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // Update Stats
+    function updateStats(wishes) {
+      document.getElementById("stat-total").textContent = wishes.length;
+
+      const totalLikes = wishes.reduce((sum, w) => sum + (w.likes || 0), 0);
+      document.getElementById("stat-likes").textContent = totalLikes;
+
+      // Find top tag
+      const tagCounts = {};
+      wishes.forEach((w) => {
+        const tag = w.tag || "Friend";
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      });
+      let topTag = "—";
+      let maxCount = 0;
+      for (const [tag, count] of Object.entries(tagCounts)) {
+        if (count > maxCount) {
+          maxCount = count;
+          topTag = tag;
+        }
+      }
+      document.getElementById("stat-tag").textContent = topTag;
+    }
+
+    // Delete wish
+    async function deleteFromAdmin(id) {
+      if (confirm("Are you sure you want to permanently delete this wish?")) {
+        await window.wishStore.deleteWish(id);
+      }
+    }
+
+    // Export wishes to Text file
+    function exportWishes() {
+      const wishes = window.wishStore.wishes || [];
+      if (wishes.length === 0) {
+        alert("No wishes to export yet!");
+        return;
+      }
+
+      let content = "🎂 BIRTHDAY WISHES EXPORT 🎂\n";
+      content += "========================================\n\n";
+
+      wishes.forEach((w, i) => {
+        content += `#${i + 1} From: ${w.name || "Friend"} (${w.tag || "Friend"})\n`;
+        content += `Date: ${formatDateFull(w.createdAt)}\n`;
+        content += `Likes: ${w.likes || 0}\n`;
+        content += `Message:\n"${w.text}"\n`;
+        content += "----------------------------------------\n\n";
+      });
+
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `birthday-wishes-${new Date().toISOString().slice(0,10)}.txt`;
+      a.click();
+    }
+
+    // Helpers
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatDateFull(isoDate) {
+      if (!isoDate) return "Just now";
+      try {
+        const d = new Date(isoDate);
+        return d.toLocaleDateString(undefined, {
+          month: 'short', day: 'numeric', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+      } catch (e) {
+        return "Recent";
+      }
+    }
+
+    // Run Auth check on start
+    window.addEventListener("DOMContentLoaded", checkAuth);
+  </script>
+</body>
+</html>
