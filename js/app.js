@@ -4,7 +4,7 @@
  */
 
 // Admin passkey configuration (Change this to whatever PIN you want!)
-const ADMIN_PASSKEY = "sara123";
+const ADMIN_PASSKEY = "sara2119123";
 window.isAdminMode = (typeof SafeStore !== "undefined" && SafeStore.getSession("is_admin_mode") === "true");
 
 document.addEventListener("DOMContentLoaded", () => {
